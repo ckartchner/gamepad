@@ -18,11 +18,10 @@
 #include <Encoder.h>
 #include <Bounce2.h>
 
-int rx_led = 17;
+byte rx_led = 17;
 
-const int button_pins[] = {10, 16, 14, 15, 18};
-const int button_count = sizeof(button_pins) / sizeof(int);
-const int knob_count = 1;
+const byte button_pins[] = {10, 16, 14, 15, 18};
+const byte button_count = sizeof(button_pins) / sizeof(byte);
 int all_button_count = button_count;
 
 Bounce* buttons = new Bounce[button_count];
