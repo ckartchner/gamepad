@@ -83,6 +83,13 @@ void setup()
 int ledState = 1;
 long newPos;
 
+void updateEncoderButton(byte button)
+{
+  Joystick.setButton(button, 1);
+  delay(50);
+  Joystick.setButton(button, 0);
+}
+
 void loop()
 {
   // read pin values for all buttons -> send signal if changed
@@ -109,15 +116,11 @@ void loop()
     {
       if (newPos > curr_knob.current_position)
       {
-        Joystick.setButton(curr_knob.cw_button, 1);
-        delay(50);
-        Joystick.setButton(curr_knob.cw_button, 0);
+        updateEncoderButton(curr_knob.cw_button);
       }
       else
       {
-        Joystick.setButton(curr_knob.ccw_button, 1);
-        delay(50);
-        Joystick.setButton(curr_knob.ccw_button, 0);
+        updateEncoderButton(curr_knob.ccw_button);
       }
       curr_knob.current_position = newPos;
     }
