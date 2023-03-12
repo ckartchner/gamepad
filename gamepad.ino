@@ -23,9 +23,38 @@ int rx_led = 17;
 const int button_pins[] = {10, 16, 14, 15, 18};
 const int button_count = sizeof(button_pins) / sizeof(int);
 const int knob_count = 1;
-const int all_button_count = button_count + (knob_count * 2);
+int all_button_count = button_count;
 
 Bounce* buttons = new Bounce[button_count];
+
+class Knob
+{
+public:
+  long current_position;
+  byte pin1;
+  byte pin2;
+  byte cw_button;
+  byte ccw_button;
+  Encoder* encoder;
+  Knob(byte pin1, byte pin2)
+  {
+    pin1 = pin1;
+    pin2 = pin2;
+
+    cw_button = all_button_count;
+    all_button_count++;
+    ccw_button = all_button_count;
+    all_button_count++;
+
+    current_position = 7;
+    encoder = new Encoder(pin1, pin2);
+  }
+};
+
+Knob allKnobs[] = {
+  Knob(0, 1),
+  Knob(2, 3)
+};
 
 Joystick_ Joystick(
     JOYSTICK_DEFAULT_REPORT_ID,
@@ -36,26 +65,6 @@ Joystick_ Joystick(
     false, false,        // No rudder or throttle
     false, false, false  // No accelerator, brake, or steering
 );
-
-class Knob
-{
-public:
-  long current_position;
-  byte pin1;
-  byte pin2;
-  Encoder* encoder;
-  Knob(byte pin1, byte pin2)
-  {
-    pin1 = pin1;
-    pin2 = pin2;
-    current_position = 0;
-    encoder = new Encoder(pin1, pin2);
-  }
-};
-
-Knob knobA = Knob(0, 1);
-// Knob knobB(2, 3);
-// Knob knobs[2] = {knobA, knobB};
 
 void buttonInit()
 {
@@ -69,16 +78,12 @@ void buttonInit()
 void setup()
 {
   Serial.begin(9600);
-  // Serial.println("starting setup");
   buttonInit();
   Joystick.begin();
-  // Serial.println("setup over");
 }
 
 int ledState = 1;
-// long positionA = -999;
-// long positionRight = -999;
-long newPos, newLeft, newRight;
+long newPos;
 
 void loop()
 {
@@ -99,28 +104,33 @@ void loop()
     }
   }
   // read rotary encoders
-  // TODO: for knob in knobs
-  newPos = knobA.encoder->read();
-  if (newPos != knobA.current_position)
+  for (Knob& curr_knob : allKnobs) // & refers to original object and not a copy
   {
-    Serial.print("New position: ");
-    Serial.println(newPos);
-    if (newPos > knobA.current_position)
+    newPos = curr_knob.encoder->read();
+    if (newPos != curr_knob.current_position)
     {
-      // TODO: set button number as an object property
-      Joystick.setButton(5, 1);
-      delay(50);
-      Joystick.setButton(5, 0);
+      Serial.print("Current buttons: ");
+      Serial.print(curr_knob.cw_button);
+      Serial.print(" ");
+      Serial.print(curr_knob.ccw_button);
+      Serial.print(" curr pos: ");
+      Serial.print(curr_knob.current_position);
+      Serial.print(" new pos: ");
+      Serial.println(newPos);
+
+      if (newPos > curr_knob.current_position)
+      {
+        Joystick.setButton(curr_knob.cw_button, 1);
+        delay(50);
+        Joystick.setButton(curr_knob.cw_button, 0);
+      }
+      else
+      {
+        Joystick.setButton(curr_knob.ccw_button, 1);
+        delay(50);
+        Joystick.setButton(curr_knob.ccw_button, 0);
+      }
+      curr_knob.current_position = newPos;
     }
-    else
-    {
-      Joystick.setButton(6, 1);
-      delay(50);
-      Joystick.setButton(6, 0);
-    }
-    knobA.current_position = newPos;
-    // Serial.print("Left = ");
-    // Serial.println();
-    // positionLeft = newLeft;
   }
 }
