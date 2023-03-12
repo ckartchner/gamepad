@@ -77,7 +77,6 @@ void buttonInit()
 
 void setup()
 {
-  Serial.begin(9600);
   buttonInit();
   Joystick.begin();
 }
@@ -109,15 +108,6 @@ void loop()
     newPos = curr_knob.encoder->read();
     if (newPos != curr_knob.current_position)
     {
-      Serial.print("Current buttons: ");
-      Serial.print(curr_knob.cw_button);
-      Serial.print(" ");
-      Serial.print(curr_knob.ccw_button);
-      Serial.print(" curr pos: ");
-      Serial.print(curr_knob.current_position);
-      Serial.print(" new pos: ");
-      Serial.println(newPos);
-
       if (newPos > curr_knob.current_position)
       {
         Joystick.setButton(curr_knob.cw_button, 1);
